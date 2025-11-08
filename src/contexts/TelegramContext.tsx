@@ -20,10 +20,6 @@ export const TelegramProvider = ({ children }: { children: ReactNode }) => {
       setWebApp(tg);
       setUser(getTelegramUser(tg));
       setIsTelegram(true);
-      
-      // Example of setting up the main button
-      tg.MainButton.text = 'Continue';
-      tg.MainButton.show();
     }
   }, []);
 
