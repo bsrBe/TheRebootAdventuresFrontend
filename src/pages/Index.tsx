@@ -1,16 +1,31 @@
 import { RegistrationForm } from "@/components/RegistrationForm";
 import { useTelegram } from "@/hooks/useTelegram";
 import heroImage from "@/assets/horseback-hero.jpg";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-  const { isReady } = useTelegram();
+  const { isReady, user, webApp, isTelegram } = useTelegram();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isReady && isTelegram && !user) {
+      // If in Telegram but not authenticated, you might want to handle this case
+      console.log('Telegram WebApp detected but no user data');
+    }
+  }, [isReady, isTelegram, user]);
 
   if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">Loading Reboot Adventures...</p>
+          {!isTelegram && (
+            <p className="mt-4 text-sm text-muted-foreground">
+              For the best experience, open this app in Telegram
+            </p>
+          )}
         </div>
       </div>
     );
@@ -29,6 +44,11 @@ const Index = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
             Reboot Adventures
           </h1>
+          {user && (
+            <p className="text-white/90 mb-2">
+              Welcome back, <span className="font-semibold">{user.first_name}</span>! 👋
+            </p>
+          )}
           <div className="text-xs sm:text-sm text-white/90 space-y-0.5">
             <p><span className="font-semibold">September 29th</span></p>
             <p>Meetup at <span className="font-semibold text-accent">Reboot Coffee, 4 Kilo</span></p>
