@@ -1,5 +1,6 @@
 import { RegistrationForm } from "@/components/RegistrationForm";
 import { useTelegram } from "@/hooks/useTelegram";
+import { api } from "@/services/api";
 import heroImage from "@/assets/horseback-hero.jpg";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -9,11 +10,23 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isReady && isTelegram && !user) {
-      // If in Telegram but not authenticated, you might want to handle this case
-      console.log('Telegram WebApp detected but no user data');
-    }
-  }, [isReady, isTelegram, user]);
+    const checkRegistration = async () => {
+      if (isReady && isTelegram && user) {
+        try {
+          const userData = await api.getUserByTelegramId(user.id);
+          if (userData && userData.data) {
+            // User is already registered, redirect to events
+            navigate('/events');
+          }
+        } catch (error) {
+          // User not found or error, stay on registration page
+          console.log('User not registered or error checking status');
+        }
+      }
+    };
+
+    checkRegistration();
+  }, [isReady, isTelegram, user, navigate]);
 
   if (!isReady) {
     return (
@@ -35,7 +48,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Compact Header with Background */}
       <div className="relative h-32 sm:h-40 overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center grayscale"
           style={{ backgroundImage: `url(${heroImage})` }}
         />
