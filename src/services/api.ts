@@ -62,7 +62,13 @@ export const api = {
   },
 
   async getUserByTelegramId(telegramId: number) {
-    const response = await fetch(`${API_BASE_URL}/users/telegram/${telegramId}`);
+    const response = await fetch(`${API_BASE_URL}/users/telegram/${telegramId}`, {
+      cache: 'no-store',
+      headers: {
+        'Pragma': 'no-cache',
+        'Cache-Control': 'no-cache'
+      }
+    });
     if (!response.ok) {
       if (response.status === 404) return null;
       throw new Error('Failed to fetch user');

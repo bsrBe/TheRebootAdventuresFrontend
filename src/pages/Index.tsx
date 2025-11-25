@@ -2,39 +2,47 @@ import { RegistrationForm } from "@/components/RegistrationForm";
 import { useTelegram } from "@/hooks/useTelegram";
 import { api } from "@/services/api";
 import heroImage from "@/assets/horseback-hero.jpg";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const { isReady, user, webApp, isTelegram } = useTelegram();
   const navigate = useNavigate();
+  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     const checkRegistration = async () => {
       if (isReady && isTelegram && user) {
         try {
           const userData = await api.getUserByTelegramId(user.id);
-          if (userData && userData.data) {
+          // Check if user exists AND has completed registration (has a name)
+          if (userData && userData.data && userData.data.fullName) {
             // User is already registered, redirect to events
             navigate('/events');
+            return;
           }
         } catch (error) {
           // User not found or error, stay on registration page
           console.log('User not registered or error checking status');
         }
       }
+      setIsChecking(false);
     };
 
-    checkRegistration();
+    if (isReady) {
+      checkRegistration();
+    }
   }, [isReady, isTelegram, user, navigate]);
 
-  if (!isReady) {
+  if (!isReady || isChecking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading Reboot Adventures...</p>
-          {!isTelegram && (
+          <p className="text-muted-foreground">
+            {!isReady ? 'Loading Reboot Adventures...' : 'Checking registration status...'}
+          </p>
+          {!isTelegram && isReady && (
             <p className="mt-4 text-sm text-muted-foreground">
               For the best experience, open this app in Telegram
             </p>

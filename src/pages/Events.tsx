@@ -44,9 +44,10 @@ const Events = () => {
                     const userData = await api.getUserByTelegramId(telegramUser.id);
                     if (userData && userData.data) {
                         setUserId(userData.data._id || userData.data.id);
-                        const registered = new Set<string>(
-                            (userData.data.registeredEvents || []).map((e: any) => e.eventId)
-                        );
+                        const registered = new Set<string>();
+                        if (userData.data.registeredEvents) {
+                            (userData.data.registeredEvents as any[]).forEach((e: any) => registered.add(e.eventId));
+                        }
                         setRegisteredEventIds(registered);
                     }
                 }
