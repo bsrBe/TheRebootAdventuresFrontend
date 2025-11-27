@@ -39,7 +39,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function RegistrationForm() {
   const { user } = useTelegram();
-  
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -63,25 +63,28 @@ export function RegistrationForm() {
 
   const registerUserMutation = useMutation({
     mutationFn: (data: FormValues) => {
-      return api.registerUser({
-        ...data,
+      const registrationData = {
+        fullName: data.fullName,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        age: data.age,
+        weight: data.weight,
+        height: data.height,
+        horseRidingExperience: data.horseRidingExperience,
+        referralSource: data.referralSource,
         telegramData: window.Telegram?.WebApp.initDataUnsafe?.user || null,
-      });
+      };
+      return api.registerUser(registrationData);
     },
     onSuccess: () => {
       toast.success("Registration submitted successfully!", {
-        description: "We'll contact you soon with more details.",
+        description: "Redirecting to events page...",
       });
-      form.reset({
-        fullName: user ? `${user.first_name} ${user.last_name || ''}`.trim() : "",
-        email: "",
-        phoneNumber: "+251",
-        age: undefined,
-        weight: undefined,
-        height: undefined,
-        horseRidingExperience: "",
-        referralSource: "",
-      });
+
+      // Redirect to events page after a short delay
+      setTimeout(() => {
+        window.location.href = '/events';
+      }, 1500);
     },
     onError: (error: Error) => {
       toast.error("Registration failed", {
@@ -219,8 +222,8 @@ export function RegistrationForm() {
           )}
         />
 
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
           disabled={registerUserMutation.isPending}
         >
