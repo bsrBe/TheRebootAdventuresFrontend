@@ -38,9 +38,14 @@ const Events = () => {
                 // Fetch events
                 const eventsData = await api.getEvents();
                 setEvents(eventsData.data || []);
+            } catch (error) {
+                console.error('Error fetching events:', error);
+                toast.error('Failed to load events');
+            }
 
-                // Fetch user registration status if telegram user exists
-                if (telegramUser?.id) {
+            // Fetch user registration status if telegram user exists
+            if (telegramUser?.id) {
+                try {
                     const userData = await api.getUserByTelegramId(telegramUser.id);
                     if (userData && userData.data) {
                         setUserId(userData.data._id || userData.data.id);
@@ -50,13 +55,13 @@ const Events = () => {
                         }
                         setRegisteredEventIds(registered);
                     }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    // Don't show a toast here to avoid confusing the user if events loaded fine
                 }
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                toast.error('Failed to load events');
-            } finally {
-                setLoading(false);
             }
+
+            setLoading(false);
         };
 
         fetchData();
