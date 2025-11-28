@@ -13,18 +13,26 @@ const Index = () => {
   useEffect(() => {
     const checkRegistration = async () => {
       if (isReady && isTelegram && user) {
+        console.log('Checking registration for user:', user.id);
         try {
           const userData = await api.getUserByTelegramId(user.id);
+          console.log('User data received:', userData);
+
           // Check if user exists AND has completed registration (has a name)
           if (userData && userData.data && userData.data.fullName) {
+            console.log('User is registered, redirecting to events...');
             // User is already registered, redirect to events
             navigate('/events');
             return;
+          } else {
+            console.log('User is NOT registered or missing fullName');
           }
         } catch (error) {
           // User not found or error, stay on registration page
-          console.log('User not registered or error checking status');
+          console.log('User not registered or error checking status:', error);
         }
+      } else {
+        console.log('Waiting for Telegram to be ready...', { isReady, isTelegram, user });
       }
       setIsChecking(false);
     };

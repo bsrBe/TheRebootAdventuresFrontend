@@ -37,8 +37,11 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+import { useNavigate } from "react-router-dom";
+
 export function RegistrationForm() {
   const { user } = useTelegram();
+  const navigate = useNavigate();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -83,7 +86,7 @@ export function RegistrationForm() {
 
       // Redirect to events page after a short delay
       setTimeout(() => {
-        window.location.href = '/events';
+        navigate('/events');
       }, 1500);
     },
     onError: (error: Error) => {
