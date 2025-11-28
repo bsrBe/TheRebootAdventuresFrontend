@@ -16,10 +16,27 @@ export const TelegramProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const tg = initTelegramWebApp();
+
+
     if (tg) {
-      setWebApp(tg);
-      setUser(getTelegramUser(tg));
-      setIsTelegram(true);
+
+
+      const tgUser = getTelegramUser(tg);
+
+      if (tgUser) {
+
+        setWebApp(tg);
+        setUser(tgUser);
+        setIsTelegram(true);
+      } else {
+
+
+        // In production, we still set the WebApp even if user is missing (might be just browsing)
+        setWebApp(tg);
+        setIsTelegram(true);
+      }
+    } else {
+
     }
   }, []);
 

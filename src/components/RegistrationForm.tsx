@@ -46,7 +46,7 @@ export function RegistrationForm() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: user ? `${user.first_name} ${user.last_name || ''}`.trim() : "",
+      fullName: "",
       email: "",
       phoneNumber: "+251",
       age: undefined,
@@ -57,12 +57,7 @@ export function RegistrationForm() {
     },
   });
 
-  // Pre-fill name from Telegram user data
-  useEffect(() => {
-    if (user) {
-      form.setValue("fullName", `${user.first_name} ${user.last_name || ''}`.trim());
-    }
-  }, [user, form]);
+
 
   const registerUserMutation = useMutation({
     mutationFn: (data: FormValues) => {
@@ -75,7 +70,7 @@ export function RegistrationForm() {
         height: data.height,
         horseRidingExperience: data.horseRidingExperience,
         referralSource: data.referralSource,
-        telegramData: window.Telegram?.WebApp.initDataUnsafe?.user || null,
+        telegramData: user || null,
       };
       return api.registerUser(registrationData);
     },
