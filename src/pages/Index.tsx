@@ -2,13 +2,12 @@ import { RegistrationForm } from "@/components/RegistrationForm";
 import { useTelegram } from "@/hooks/useTelegram";
 import { api } from "@/services/api";
 import heroImage from "@/assets/horseback-hero.jpg";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const { isReady, user, webApp, isTelegram } = useTelegram();
   const navigate = useNavigate();
-  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
     const checkRegistration = async () => {
@@ -31,24 +30,23 @@ const Index = () => {
           // User not found or error, stay on registration page
           console.log('User not registered or error checking status:', error);
         }
-      } else {
-        console.log('Waiting for Telegram to be ready...', { isReady, isTelegram, user });
       }
-      setIsChecking(false);
     };
 
-    if (isReady) {
+    // Run background check only once Telegram is ready and we have a Telegram context
+    if (isReady && isTelegram && user) {
       checkRegistration();
     }
   }, [isReady, isTelegram, user, navigate]);
 
-  if (!isReady || isChecking) {
+  // Only block on the very first Telegram initialization; once ready, always show the page
+  if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">
-            {!isReady ? 'Loading Reboot Adventures...' : 'Checking registration status...'}
+            Loading Reboot Adventures...
           </p>
           {!isTelegram && isReady && (
             <p className="mt-4 text-sm text-muted-foreground">
