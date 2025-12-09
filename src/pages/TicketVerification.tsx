@@ -10,9 +10,9 @@ interface TicketData {
     userId: string;
     eventName: string;
     amount: number;
-    status: 'valid' | 'used' | 'expired';
+    status: 'valid' | 'used';
     createdAt: string;
-    expiresAt?: string;
+    signature: string;
   };
   invoice: {
     invoiceId: string;
@@ -41,6 +41,7 @@ interface TicketData {
     location: string;
     date: string;
     description?: string;
+    amount?: number;
   };
 }
 
@@ -49,7 +50,7 @@ type VerificationStatus = 'loading' | 'valid' | 'invalid' | 'expired' | 'error';
 export default function TicketVerification() {
   const { reference } = useParams<{ reference: string }>();
   const navigate = useNavigate();
-  
+
   const [status, setStatus] = useState<VerificationStatus>('loading');
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
   const [error, setError] = useState<string>('');
@@ -69,19 +70,27 @@ export default function TicketVerification() {
     try {
       setStatus('loading');
       setError('');
-      
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/ticket/${reference}`);
+
+      // NOTE: Ensure this URL points to your actual, secure backend endpoint
+      const response = await fetch(`http://localhost:5000/ticket/${reference}`);
       const data = await response.json();
-      
-      if (data.success) {
+
+      if (response.ok && data.success) {
+        console.log('Ticket data received:', data.data);
+        console.log('Ticket status:', data.data.ticket.status);
+        console.log('Event name:', data.data.event?.name);
+        console.log('User name:', data.data.user?.fullName);
         setTicketData(data.data);
-        setStatus(data.data.ticket.status === 'valid' ? 'valid' : 
-                data.data.ticket.status === 'expired' ? 'expired' : 'invalid');
+        // Map 'used' status to 'invalid' for display purposes
+        setStatus(data.data.ticket.status === 'valid' ? 'valid' : 'invalid');
       } else {
+        // Handle server-side errors or failed verification
+        console.log('API error:', data.message);
         setStatus('invalid');
         setError(data.message || 'Invalid ticket');
       }
     } catch (err) {
+      // Handle network errors or unexpected fetch failures
       setStatus('error');
       setError('Failed to verify ticket. Please try again.');
       console.error('Ticket verification error:', err);
@@ -155,6 +164,31 @@ export default function TicketVerification() {
     );
   }
 
+  // --- Data Preparation for Rendering ---
+  console.log('Current ticketData state:', ticketData);
+  const eventDateTime = ticketData?.event?.date || ticketData?.invoice?.metadata?.time;
+  console.log('Event datetime:', eventDateTime);
+  let eventDate = 'N/A';
+  let eventTime = 'N/A';
+  let paymentDate = 'N/A';
+
+  if (eventDateTime) {
+    const dateObj = new Date(eventDateTime);
+    // Check if the date object is valid before formatting
+    if (!isNaN(dateObj.getTime())) {
+      eventDate = dateObj.toLocaleDateString();
+      eventTime = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+  }
+
+  if (ticketData?.invoice?.paidAt) {
+    const paidDateObj = new Date(ticketData.invoice.paidAt);
+    if (!isNaN(paidDateObj.getTime())) {
+      paymentDate = paidDateObj.toLocaleDateString();
+    }
+  }
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 p-4">
       <div className="max-w-4xl mx-auto">
@@ -165,12 +199,13 @@ export default function TicketVerification() {
             <h1 className={`text-3xl font-bold mt-4 ${getStatusColor().split(' ')[0]}`}>
               {getStatusText()}
             </h1>
-            <p className="text-gray-600 mt-2">Reference: {reference}</p>
+            {/* <p className="text-gray-600 mt-2">Reference: {reference}</p> */}
           </div>
 
-          {/* Ticket Details */}
+          {/* Ticket Details Section */}
           {ticketData && (
             <div className="p-6 space-y-6">
+
               {/* Event Information */}
               <div className="bg-gray-50 rounded-xl p-6">
                 <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
@@ -180,31 +215,30 @@ export default function TicketVerification() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-600">Event Name</p>
-                    <p className="font-semibold">{ticketData.event.name}</p>
+                    <p className="font-semibold">{ticketData.event?.name || ticketData.ticket?.eventName}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Location</p>
                     <p className="font-semibold flex items-center">
                       <MapPin className="w-4 h-4 mr-1" />
-                      {ticketData.event.location}
+                      {ticketData.event?.location || ticketData.invoice?.metadata?.place}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Date & Time</p>
                     <p className="font-semibold">
-                      {new Date(ticketData.event.date).toLocaleDateString()} at{' '}
-                      {new Date(ticketData.invoice.metadata.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      {ticketData.event?.date ? new Date(ticketData.event.date).toLocaleDateString() : new Date(ticketData.invoice?.metadata?.time).toLocaleDateString()} at {new Date(ticketData.invoice?.metadata?.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Ticket Price</p>
                     <p className="font-semibold flex items-center">
                       <CreditCard className="w-4 h-4 mr-1" />
-                      {ticketData.invoice.amount} {ticketData.invoice.currency}
+                      {ticketData.ticket?.amount || ticketData.invoice?.amount} {ticketData.invoice?.currency}
                     </p>
                   </div>
                 </div>
-                {ticketData.event.description && (
+                {(ticketData.event?.description) && (
                   <div className="mt-4">
                     <p className="text-sm text-gray-600">Description</p>
                     <p className="text-gray-800">{ticketData.event.description}</p>
@@ -221,13 +255,13 @@ export default function TicketVerification() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-600">Full Name</p>
-                    <p className="font-semibold">{ticketData.user.fullName}</p>
+                    <p className="font-semibold">{ticketData.user?.fullName}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Email</p>
-                    <p className="font-semibold">{ticketData.user.email}</p>
+                    <p className="font-semibold">{ticketData.user?.email}</p>
                   </div>
-                  {ticketData.user.telegramUsername && (
+                  {ticketData.user?.telegramUsername && (
                     <div>
                       <p className="text-sm text-gray-600">Telegram</p>
                       <p className="font-semibold">@{ticketData.user.telegramUsername}</p>
@@ -247,38 +281,27 @@ export default function TicketVerification() {
                   <div>
                     <p className="text-sm text-gray-600">Payment Date</p>
                     <p className="font-semibold">
-                      {new Date(ticketData.invoice.paidAt).toLocaleDateString()}
+                      {new Date(ticketData.invoice?.paidAt).toLocaleDateString()}
                     </p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Transaction ID</p>
-                    <p className="font-semibold">{ticketData.invoice.transactionId}</p>
+                    <p className="font-semibold">{ticketData.ticket?.transactionId}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Payer Name</p>
-                    <p className="font-semibold">{ticketData.invoice.receiptData.senderName}</p>
+                    <p className="font-semibold">{ticketData.invoice?.receiptData?.senderName}</p>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Amount Paid</p>
                     <p className="font-semibold">
-                      {ticketData.invoice.receiptData.confirmedAmount} {ticketData.invoice.currency}
+                      {ticketData.invoice?.receiptData?.confirmedAmount} {ticketData.invoice?.currency}
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="text-center pt-6 border-t">
-                <p className="text-sm text-gray-500">
-                  This ticket was verified on {new Date().toLocaleString()}
-                </p>
-                <button
-                  onClick={() => window.print()}
-                  className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Print Ticket
-                </button>
-              </div>
             </div>
           )}
         </div>
