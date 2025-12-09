@@ -1,10 +1,10 @@
 import { useTelegram as useTelegramContext } from '@/contexts/TelegramContext';
 
 export const useTelegram = () => {
-  const { webApp, user, isTelegram } = useTelegramContext();
+  const { webApp, user, isTelegram, isReady } = useTelegramContext();
   
   return {
-    isReady: isTelegram,
+    isReady,
     user,
     webApp,
     isTelegram,

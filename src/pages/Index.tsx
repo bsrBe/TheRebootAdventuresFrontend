@@ -2,26 +2,37 @@ import { RegistrationForm } from "@/components/RegistrationForm";
 import { useTelegram } from "@/hooks/useTelegram";
 import { api } from "@/services/api";
 import heroImage from "@/assets/horseback-hero.jpg";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const { isReady, user, webApp, isTelegram } = useTelegram();
   const navigate = useNavigate();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     const checkRegistration = async () => {
       if (isReady && isTelegram && user) {
         console.log('Checking registration for user:', user.id);
+        setIsCheckingAuth(true);
+        
         try {
-          const userData = await api.getUserByTelegramId(user.id);
+          // Add a timeout to prevent long delays
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout')), 3000)
+          );
+          
+          const userDataPromise = api.getUserByTelegramId(user.id);
+          
+          const userData = await Promise.race([userDataPromise, timeoutPromise]) as any;
           console.log('User data received:', userData);
 
           // Check if user exists AND has completed registration (has a name)
           if (userData && userData.data && userData.data.fullName) {
             console.log('User is registered, redirecting to events...');
-            // User is already registered, redirect to events
-            navigate('/events');
+            // User is already registered, redirect to events immediately
+            navigate('/events', { replace: true });
             return;
           } else {
             console.log('User is NOT registered or missing fullName');
@@ -29,17 +40,35 @@ const Index = () => {
         } catch (error) {
           // User not found or error, stay on registration page
           console.log('User not registered or error checking status:', error);
+        } finally {
+          setIsCheckingAuth(false);
+          setAuthChecked(true);
         }
+      } else if (isReady && !isTelegram) {
+        // Not in Telegram, don't check auth
+        setIsCheckingAuth(false);
+        setAuthChecked(true);
       }
     };
 
-    // Run background check only once Telegram is ready and we have a Telegram context
-    if (isReady && isTelegram && user) {
-      checkRegistration();
-    }
+    checkRegistration();
   }, [isReady, isTelegram, user, navigate]);
 
-  // Only block on the very first Telegram initialization; once ready, always show the page
+  // Show loading only while checking authentication for the first time
+  if (isCheckingAuth || !authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">
+            Checking registration status...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Only block on the very first Telegram initialization
   if (!isReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
