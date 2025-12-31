@@ -16,15 +16,15 @@ const Index = () => {
       if (isReady && isTelegram && user) {
         console.log('Checking registration for user:', user.id);
         setIsCheckingAuth(true);
-        
+
         try {
           // Add a timeout to prevent long delays
-          const timeoutPromise = new Promise((_, reject) => 
+          const timeoutPromise = new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Timeout')), 3000)
           );
-          
+
           const userDataPromise = api.getUserByTelegramId(user.id);
-          
+
           const userData = await Promise.race([userDataPromise, timeoutPromise]) as any;
           console.log('User data received:', userData);
 
@@ -106,7 +106,6 @@ const Index = () => {
             </p>
           )}
           <div className="text-xs sm:text-sm text-white/90 space-y-0.5">
-            <p><span className="font-semibold">September 29th</span></p>
             <p>Meetup at <span className="font-semibold text-accent">Reboot Coffee, 4 Kilo</span></p>
           </div>
         </div>
