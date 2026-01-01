@@ -87,7 +87,13 @@ const Gallery = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
                 <div className="relative z-10 h-full max-w-6xl mx-auto px-4 flex flex-col items-center justify-center text-center">
                     <div className="w-full flex justify-start mb-4">
-                        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="text-white/60 hover:text-white">
+                        <Button variant="ghost" size="sm" onClick={() => {
+                            if (window.history.length > 2) {
+                                navigate(-1);
+                            } else {
+                                navigate('/events');
+                            }
+                        }} className="text-white/60 hover:text-white">
                             <ArrowLeft className="h-4 w-4 mr-2" /> Back
                         </Button>
                     </div>
@@ -162,7 +168,7 @@ const Gallery = () => {
                 <p className="text-muted-foreground mb-6 max-w-sm mx-auto text-sm px-4">
                     Send your trip photos to our Telegram bot after your adventure. If approved, you'll be featured right here!
                 </p>
-                <Button onClick={() => window.open('https://t.me/your_bot_id', '_blank')}>
+                <Button onClick={() => window.open('https://t.me/Reboot_Adventures_bot', '_blank')}>
                     Open Telegram Bot
                 </Button>
             </div>

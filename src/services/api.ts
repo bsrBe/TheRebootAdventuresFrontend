@@ -61,6 +61,23 @@ export const api = {
     return response.json();
   },
 
+  async updateUser(userId: string, data: Partial<RegistrationData>) {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Failed to update profile');
+    }
+
+    return response.json();
+  },
+
   async getUserByTelegramId(telegramId: number) {
     const response = await fetch(`${API_BASE_URL}/users/telegram/${telegramId}`, {
       cache: 'no-store',
