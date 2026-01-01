@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '@/hooks/useTelegram';
 import { api } from '@/services/api';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { Calendar, MapPin, Users } from 'lucide-react';
+import { Calendar, MapPin, Users, Camera } from 'lucide-react';
 
 interface Event {
     _id: string;
@@ -25,6 +26,7 @@ interface RegisteredEvent {
 }
 
 const Events = () => {
+    const navigate = useNavigate();
     const { user: telegramUser } = useTelegram();
     const [events, setEvents] = useState<Event[]>([]);
     const [registeredEventIds, setRegisteredEventIds] = useState<Set<string>>(new Set());
@@ -110,7 +112,13 @@ const Events = () => {
 
     return (
         <div className="container mx-auto p-4 pb-20">
-            <h1 className="text-2xl font-bold mb-6">Upcoming Events</h1>
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-bold">Upcoming Events</h1>
+                <Button variant="outline" size="sm" onClick={() => navigate('/gallery')} className="flex items-center gap-2">
+                    <Camera className="h-4 w-4" />
+                    Trip Gallery
+                </Button>
+            </div>
 
             {events.length === 0 ? (
                 <div className="text-center py-10 text-muted-foreground">

@@ -74,5 +74,11 @@ export const api = {
       throw new Error('Failed to fetch user');
     }
     return response.json();
+  },
+
+  async getPublicMemories(page = 1, limit = 12) {
+    const response = await fetch(`${API_BASE_URL}/memories?page=${page}&limit=${limit}`);
+    if (!response.ok) throw new Error('Failed to fetch gallery');
+    return response.json();
   }
 };
