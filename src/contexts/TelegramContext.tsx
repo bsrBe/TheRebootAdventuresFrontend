@@ -20,10 +20,10 @@ export const TelegramProvider = ({ children }: { children: ReactNode }) => {
     const initializeTelegram = () => {
       try {
         const tg = initTelegramWebApp();
-        
+
         if (tg) {
           const tgUser = getTelegramUser(tg);
-          
+
           if (tgUser) {
             setWebApp(tg);
             setUser(tgUser);
@@ -46,7 +46,7 @@ export const TelegramProvider = ({ children }: { children: ReactNode }) => {
 
     // Small delay to ensure Telegram WebApp is ready
     const timer = setTimeout(initializeTelegram, 100);
-    
+
     return () => clearTimeout(timer);
   }, []);
 

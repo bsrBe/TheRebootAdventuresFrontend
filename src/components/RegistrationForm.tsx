@@ -212,9 +212,20 @@ export function RegistrationForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-foreground">Where did you hear about us?</FormLabel>
-              <FormControl>
-                <Input placeholder="Social media, friend, etc." {...field} className="bg-input border-border text-foreground" />
-              </FormControl>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger className="bg-input border-border text-foreground">
+                    <SelectValue placeholder="Select an option" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="bg-popover border-border">
+                  <SelectItem value="Telegram">Telegram</SelectItem>
+                  <SelectItem value="Instagram">Instagram</SelectItem>
+                  <SelectItem value="TikTok">TikTok</SelectItem>
+                  <SelectItem value="Friend/Family">Friend/Family</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

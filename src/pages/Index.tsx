@@ -88,32 +88,41 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Compact Header with Background */}
-      <div className="relative h-32 sm:h-40 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center grayscale"
-          style={{ backgroundImage: `url(${heroImage})` }}
+    <div className="min-h-screen bg-background flex flex-col md:flex-row">
+      {/* Image Section - Constrained height on mobile, full height on desktop */}
+      <div className="w-full h-[40vh] md:w-1/2 lg:w-5/12 md:h-screen md:sticky md:top-0 relative bg-muted overflow-hidden">
+        <img
+          src={heroImage}
+          alt="Welcome to Reboot Adventures"
+          className="w-full h-full object-cover md:object-center object-top"
         />
-        <div className="absolute inset-0 bg-black/70" />
-        <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+        {/* Overlay Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+
+        {/* Text Overlay */}
+        <div className="absolute bottom-0 left-0 w-full p-4 md:p-12 text-white z-10">
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2">
             Reboot Adventures
           </h1>
           {user && (
-            <p className="text-white/90 mb-2">
+            <p className="text-base sm:text-lg text-white/90 mb-2 sm:mb-3">
               Welcome back, <span className="font-semibold">{user.first_name}</span>! 👋
             </p>
           )}
-          <div className="text-xs sm:text-sm text-white/90 space-y-0.5">
+          <div className="inline-flex items-center gap-2 text-xs sm:text-sm text-white/90 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/10">
+            <span>📍</span>
             <p>Meetup at <span className="font-semibold text-accent">Reboot Coffee, 4 Kilo</span></p>
           </div>
         </div>
       </div>
 
-      {/* Form Container - Mobile Optimized */}
-      <div className="px-4 py-6 sm:px-6 max-w-lg mx-auto">
-        <RegistrationForm />
+      {/* Content Section */}
+      <div className="w-full md:w-1/2 lg:w-7/12 flex flex-col justify-center p-6 md:p-12 lg:p-16">
+        <div className="max-w-lg mx-auto w-full">
+          {/* Header removed from here as it's now on the image */}
+
+          <RegistrationForm />
+        </div>
       </div>
     </div>
   );
