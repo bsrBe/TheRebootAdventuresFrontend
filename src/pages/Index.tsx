@@ -1,7 +1,7 @@
 import { RegistrationForm } from "@/components/RegistrationForm";
 import { useTelegram } from "@/hooks/useTelegram";
 import { api } from "@/services/api";
-import heroImage from "@/assets/horseback-hero.jpg";
+import heroImage from "@/assets/RebootWelcome.jpg";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
